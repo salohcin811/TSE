@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verify TSE Passport</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+    :root { --gold: #D4AF37; --black: #0A0A0A; }
+    body { font-family: 'Montserrat'; background: var(--black); color: var(--gold); padding: 20px; text-align: center; }
+    h1 { font-family: 'Cinzel'; }
+   .card { background: #111; padding: 30px; border-radius: 15px; border: 2px solid var(--gold); max-width: 500px; margin: 20px auto; }
+   .valid { color: #00FF00; font-size: 24px; font-weight: bold; }
+   .invalid { color: #FF0000; font-size: 24px; font-weight: bold; }
+   .detail { text-align: left; margin: 10px 0; }
+</style>
+</head>
+<body>
+    <h1>👑 TEAM SINGLE EMPIRE 👑</h1>
+    <h2>PASSPORT VERIFICATION</h2>
+    <div class="card" id="result">Loading...</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmXKbyLJmf2IU1hS8RI0uAE5LWgkAvovI",
+    authDomain: "single-empire.firebaseapp.com",
+    databaseURL: "https://single-empire-default-rtdb.firebaseio.com",
+    projectId: "single-empire",
+    storageBucket: "single-empire.firebasestorage.app",
+    messagingSenderId: "719163390473",
+    appId: "1:719163390473:web:857798e381fb16456616d8"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const passportNo = urlParams.get('no');
+
+  if (!passportNo) {
+    document.getElementById('result').innerHTML = '<p class="invalid">❌ NO PASSPORT NUMBER PROVIDED</p>';
+  } else {
+    db.ref('citizens/' + passportNo).once('value')
+     .then(snap => {
+        if (snap.exists()) {
+          const c = snap.val();
+          document.getElementById('result').innerHTML = `
+            <p class="valid">✅ VERIFIED CITIZEN</p>
+            <div class="detail"><b>PASSPORT NO:</b> ${c.no}</div>
+            <div class="detail"><b>ROYAL NAME:</b> ${c.jina.toUpperCase()}</div>
+            <div class="detail"><b>STATUS:</b> Certified Single</div>
+            <div class="detail"><b>EMBASSY:</b> ${(c.embassy || 'N/A').toUpperCase()}</div>
+            <div class="detail"><b>LAST BETRAYAL:</b> ${c.oshwa}</div>
+            <div class="detail"><b>DECREED:</b> ${c.date}</div>
+            <p style="margin-top:20px; font-size:12px;">LONG LIVE THE EMPIRE</p>
+          `;
+        } else {
+          document.getElementById('result').innerHTML = '<p class="invalid">❌ FAKE PASSPORT<br>This citizen does not exist in the Empire</p>';
+        }
+      })
+     .catch(err => {
+        document.getElementById('result').innerHTML = '<p class="invalid">❌ DATABASE ERROR</p>';
+      });
+  }
+</script>
+</body>
+</html>
